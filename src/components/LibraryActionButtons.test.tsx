@@ -12,6 +12,7 @@ const createHandlers = () => ({
 	onAddMagnet: vi.fn(),
 	onLocalRestore: vi.fn().mockResolvedValue(undefined),
 	onLocalBackup: vi.fn().mockResolvedValue(undefined),
+	onGetAllLinks: vi.fn().mockResolvedValue(undefined),
 	onDedupeBySize: vi.fn(),
 	onDedupeByRecency: vi.fn(),
 	onCombineSameHash: vi.fn(),

@@ -10,6 +10,7 @@ interface LibraryActionButtonsProps {
 	onAddMagnet: (service: string) => void;
 	onLocalRestore: (service: 'rd' | 'ad' | 'tb') => Promise<void>;
 	onLocalBackup: () => Promise<void>;
+	onGetAllLinks: () => Promise<void>;
 	onDedupeBySize: () => void;
 	onDedupeByRecency: () => void;
 	onCombineSameHash: () => void;
@@ -30,6 +31,7 @@ export default function LibraryActionButtons({
 	onAddMagnet,
 	onLocalRestore,
 	onLocalBackup,
+	onGetAllLinks,
 	onDedupeBySize,
 	onDedupeByRecency,
 	onCombineSameHash,
@@ -110,6 +112,13 @@ export default function LibraryActionButtons({
 				<Save className="mr-1 inline-block h-4 w-4 text-blue-500" />
 				Backup
 			</LibraryButton>
+
+			<button
+				className={`mb-1 mr-2 rounded border-2 border-indigo-500 bg-indigo-900/30 px-1 py-0.5 text-[0.6rem] text-indigo-100 transition-colors hover:bg-indigo-800/50`}
+				onClick={onGetAllLinks}
+			>
+				Get All Links
+			</button>
 
 			{showDedupe && (
 				<>

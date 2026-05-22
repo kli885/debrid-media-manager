@@ -749,6 +749,90 @@ function TorrentsPage() {
 		resetSelection(setSelectedTorrents);
 	}
 
+	const wrapGetFn = useCallback(
+		(t: UserTorrent) => {
+			return async (): Promise<string[]> => {
+				if (rdKey && t.id.startsWith('rd:')) {
+					const info = await getTorrentInfo(rdKey, t.id.substring(3));
+					return info?.links || [];
+				}
+				return [];
+			};
+		},
+		[rdKey]
+	);
+
+	async function handleGetAllLinks() {
+		if (
+			relevantList.length > 0 &&
+			!(
+				await Modal.fire({
+					title: 'Get all links',
+					text: `This will get all links for ${relevantList.length} torrents. Are you sure?`,
+					icon: 'warning',
+					showCancelButton: true,
+					confirmButtonColor: '#0891b2',
+					cancelButtonColor: '#374151',
+					confirmButtonText: 'Yes, get all!',
+					background: '#111827',
+					color: '#f3f4f6',
+					customClass: {
+						popup: 'bg-gray-900',
+						htmlContainer: 'text-gray-100',
+					},
+				})
+			).isConfirmed
+		)
+			return;
+
+		const toFetch = relevantList.map(wrapGetFn);
+		const progressToast = toast.loading(
+			`Fetching links for 0/${toFetch.length} torrents...`,
+			libraryToastOptions
+		);
+
+		const [results, _errors] = await runConcurrentFunctions(
+			toFetch,
+			4,
+			0,
+			(completed, total, errorCount) => {
+				const message =
+					errorCount > 0
+						? `Fetching links for ${completed}/${total} torrents (${errorCount} errors)...`
+						: `Fetching links for ${completed}/${total} torrents...`;
+				toast.loading(message, { id: progressToast });
+			}
+		);
+
+		const links = results.flat();
+
+		let successCount = 0;
+		let failCount = 0;
+		for (const link of links) {
+			try {
+				if (rdKey) await proxyUnrestrictLink(rdKey, link);
+				successCount++;
+			} catch (e) {
+				console.error(e);
+				failCount++;
+			}
+		}
+
+		if (failCount > 0 && successCount === 0) {
+			toast.error(`Failed to get all links.`, { id: progressToast, ...libraryToastOptions });
+		} else if (failCount > 0) {
+			toast.error(`Got ${successCount} links; ${failCount} failed.`, {
+				id: progressToast,
+				...libraryToastOptions,
+			});
+		} else {
+			toast.success(`Got ${successCount} links.`, {
+				id: progressToast,
+				...libraryToastOptions,
+			});
+		}
+	}
+
 	const wrapDeleteFn = useCallback(
 		(t: UserTorrent) => {
 			return async (): Promise<string> => {
@@ -1845,6 +1929,7 @@ function TorrentsPage() {
 						onAddMagnet={handleAddMagnet}
 						onLocalRestore={wrapLocalRestoreFn}
 						onLocalBackup={localBackup}
+						onGetAllLinks={handleGetAllLinks}
 						onDedupeBySize={dedupeBySize}
 						onDedupeByRecency={dedupeByRecency}
 						onCombineSameHash={combineSameHash}
