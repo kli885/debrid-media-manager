@@ -3,34 +3,9 @@ const pwaConfig = require('./pwa.config.js');
 const withPWA = require('next-pwa')(pwaConfig);
 
 const nextConfig = {
+	output: 'export',
+	trailingSlash: true,
 	transpilePackages: ['recharts', '@reduxjs/toolkit'],
-	bundlePagesRouterDependencies: true,
-	serverExternalPackages: [
-		'better-sqlite3',
-		'@prisma/client',
-		'.prisma',
-		'node-datachannel',
-		'bufferutil',
-		'utf-8-validate',
-	],
-	outputFileTracingExcludes: {
-		'*': [
-			// Prisma CLI — build-time only, never needed at runtime
-			'node_modules/prisma/**',
-			// Prisma WASM engines — only needed for edge/WASM runtime; we use binary engine
-			'node_modules/@prisma/client/runtime/*.wasm-base64.js',
-			'node_modules/@prisma/client/runtime/*.wasm-base64.mjs',
-			// Source maps — never needed at runtime
-			'node_modules/@prisma/client/runtime/*.map',
-			// Windows binary — not needed on Linux (Netlify)
-			'node_modules/.prisma/client/query_engine-windows.dll.node',
-			// Next.js build-time and dev tools
-			'node_modules/next/dist/compiled/amphtml-validator/**',
-			'node_modules/next/dist/compiled/next-devtools/**',
-			'node_modules/next/dist/compiled/webpack/**',
-			'node_modules/next/dist/compiled/edge-runtime/**',
-		],
-	},
 	webpack: (config) => {
 		config.cache = {
 			type: 'filesystem',

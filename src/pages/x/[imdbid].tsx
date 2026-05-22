@@ -1,18 +1,21 @@
 import { getMdblistClient } from '@/services/mdblistClient';
-import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-	const mdblistClient = getMdblistClient();
-	const imdbId = context.params!.imdbid as string;
-	const resp = await mdblistClient.getInfoByImdbId(imdbId);
-	return {
-		redirect: {
-			destination: `/${resp.type}/${imdbId}`,
-			permanent: true,
-		},
-	};
+const MdblistRedirect = () => {
+	const router = useRouter();
+	const { imdbid } = router.query;
+
+	useEffect(() => {
+		if (!imdbid) return;
+		const mdblistClient = getMdblistClient();
+		mdblistClient
+			.getInfoByImdbId(imdbid as string)
+			.then((resp) => router.replace(`/${resp.type}/${imdbid}`))
+			.catch(() => router.replace(`/movie/${imdbid}`));
+	}, [imdbid, router]);
+
+	return null;
 };
 
-export default function Mdblist() {
-	return <></>;
-}
+export default MdblistRedirect;

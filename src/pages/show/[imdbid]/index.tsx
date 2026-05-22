@@ -1,15 +1,17 @@
-import { GetServerSideProps } from 'next';
+import { useRouter } from 'next/router';
+import { useEffect } from 'react';
 
-export const getServerSideProps: GetServerSideProps = async (context) => {
-	const { params } = context;
-	return {
-		redirect: {
-			destination: `/show/${params?.imdbid}/1`,
-			permanent: false,
-		},
-	};
+const RedirectPage = () => {
+	const router = useRouter();
+	const { imdbid } = router.query;
+
+	useEffect(() => {
+		if (imdbid) {
+			router.replace(`/show/${imdbid}/1`);
+		}
+	}, [imdbid, router]);
+
+	return null;
 };
-
-const RedirectPage = () => null;
 
 export default RedirectPage;
