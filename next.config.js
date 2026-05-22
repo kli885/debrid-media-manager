@@ -3,8 +3,11 @@ const pwaConfig = require('./pwa.config.js');
 const withPWA = require('next-pwa')(pwaConfig);
 
 const nextConfig = {
-	output: 'standalone',
 	transpilePackages: ['recharts', '@reduxjs/toolkit'],
+	serverExternalPackages: ['better-sqlite3'],
+	outputFileTracingExcludes: {
+		'*': ['node_modules/prisma/**'],
+	},
 	webpack: (config) => {
 		config.cache = {
 			type: 'filesystem',
